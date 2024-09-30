@@ -1,0 +1,8 @@
+{
+	"emmet.includeLanguages": {
+		"html-eex": "html"
+	},
+	"files.associations": {
+		"*.html.heex": "html-eex"
+	}
+}
