@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from contas.forms import ItemForm
 
 
 def index(_request):
@@ -180,3 +181,38 @@ class GerenciarCardapio(View):
             cursor.execute("select nome_item, imagem_item from emp1.cardapio where categoria=%s", [categoria])
             result = cursor.fetchall()
         return result
+class AdicionarItem(View):
+    def get(self, request):
+        form = ItemForm()
+        return render(request, 'adicionar_item.html', {'form': form})
+
+    def post(self, request):
+        form = ItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Pegando os dados do formulário
+            nome_item = form.cleaned_data['nome_item']
+            descricao = form.cleaned_data['descricao']
+            precos = form.cleaned_data['precos']
+            imagem_item = form.cleaned_data.get('imagem_item')
+
+            # Verificando se um arquivo de imagem foi enviado
+            if imagem_item:
+                imagem_item_name = imagem_item.name
+            else:
+                imagem_item_name = None  # Ou coloque um valor padrão aqui, se necessário
+
+            # Inserindo no banco de dados
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item)
+                    VALUES (%s, %s, %s, %s)
+                    """, [nome_item, descricao, precos, imagem_item_name]
+                )
+            
+            # Salvando usando o ORM
+            form.save(commit=True)
+
+            return redirect('painel.html')
+        
+        return render(request, 'adicionar_item.html', {'form': form})

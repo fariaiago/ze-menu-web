@@ -27,6 +27,7 @@ urlpatterns = [
 	path('painel/', views.Painel.as_view(), name='painel'),
 	path('logout/', views.Logout.as_view(), name='logout'),
     path('pedidos/', views.PedidoListView.as_view(), name='pedido'),
+    path('cardapio/adc_item/', views.AdicionarItem.as_view(), name='adicionar_item'),
     path('pedidos/aumentar/<int:mesa_id>/<int:pedido_id>/', views.AumentarQuantidadePedido.as_view(), name='aumentar_pedido'),
     path('pedidos/diminuir/<int:mesa_id>/<int:pedido_id>/', views.DiminuirQuantidadePedido.as_view(), name='diminuir_pedido'),
     path('pedidos/deletar/<int:mesa_id>/<int:pedido_id>/', views.DeletarPedido.as_view(), name='deletar_pedido'),
