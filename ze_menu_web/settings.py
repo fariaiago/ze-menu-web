@@ -76,31 +76,31 @@ WSGI_APPLICATION = 'ze_menu_web.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#DATABASES = {
+#	'default': {
+#		'ENGINE': 'django.db.backends.postgresql',
+#		"NAME": "postgres",
+#		"USER": "postgres",
+#		"PASSWORD": "postgres",
+#		"HOST": "localhost",
+#		"PORT": "5432",
+#}
+#}
+
+# Banco de dados no Tembo, não usar no wifi da UFT, do contrário o DJango não inicia
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.postgresql',
+		'OPTIONS': {
+			'options': '-c search_path=zemenu'
+		},
 		"NAME": "postgres",
 		"USER": "postgres",
-		"PASSWORD": "postgres",
-		"HOST": "localhost",
+		"PASSWORD": "WCw72vrvvoUFw8qs",
+ 		"HOST": "damnably-literary-tiger.data-1.use1.tembo.io",
 		"PORT": "5432",
-	}
-}
-
-# Banco de dados no Tembo, não usar no wifi da UFT, do contrário o DJango não inicia
-# DATABASES = {
-# 	'default': {
-# 		'ENGINE': 'django.db.backends.postgresql',
-# 		'OPTIONS': {
-# 			'options': '-c search_path=zemenu'
-# 		},
-# 		"NAME": "postgres",
-# 		"USER": "postgres",
-# 		"PASSWORD": "WCw72vrvvoUFw8qs",
-# 		"HOST": "damnably-literary-tiger.data-1.use1.tembo.io",
-# 		"PORT": "5432",
-# 	}
-# }
+ 	}
+ }
 
 
 # Password validation
