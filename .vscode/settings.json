@@ -1,0 +1,6 @@
+{
+  "python.REPL.enableREPLSmartSend": false,
+  "emmet.includeLanguages": {
+    "django-html": "html"
+  }
+}

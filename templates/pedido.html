@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .pedidos-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .titulo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  .mesas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .mesa-item {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .mesa-titulo {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .acoes {
+    display: flex;
+    gap: 10px;
+  }
+
+  .link-editar {
+    color: blue;
+    text-decoration: none;
+  }
+
+  .link-editar:hover {
+    text-decoration: underline;
+  }
+
+  .link-fechar {
+    color: red;
+    text-decoration: none;
+  }
+
+  .link-fechar:hover {
+    text-decoration: underline;
+  }
+
+  .pedidos-lista {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+  }
+
+  .pedido-item {
+    margin-bottom: 10px;
+  }
+
+  .pedido-info {
+    font-size: 14px;
+    margin-right: 5px;
+  }
+
+  .mensagem-nenhum-pedido {
+    color: #555;
+    font-size: 16px;
+  }
+
+  .btn {
+    padding: 5px 10px; 
+    border: none; 
+    border-radius: 4px; 
+    color: white; 
+    cursor: pointer; 
+    font-size: 14px; 
+    transition: background-color 0.3s ease; 
+  }
+
+  
+  .btn-edit {
+    background-color: #4CAF50; 
+  }
+
+  .btn-edit:hover {
+    background-color: #45a049; 
+  }
+
+  .btn-delete {
+    background-color: #f44336; 
+  }
+
+  .btn-delete:hover {
+    background-color: #da190b; 
+  }
+
+  .btn-close {
+    background-color: #e74c3c; 
+  }
+
+  .btn-close:hover {
+    background-color: #c0392b; 
+  }
+
+  .form-inline {
+    display: inline;
+  }
+
+  .space-x-2 {
+    gap: 5px;
+    display: flex;
+  }
+
+  .btn-decrease {
+    background-color: #2196F3; 
+  }
+
+  .btn-decrease:hover {
+    background-color: #0b7dda; 
+  }
+
+  .input-quantidade {
+    width: 100px;
+    border: 2px solid grey;
+  }
+
+</style>
+
+
+
+{% load static %}
+<div class="flex w-screen divide-x divide-ze-fdark">
+	<div class="flex flex-col bg-white w-64 h-screen">
+		<div class="flex flex-col divide-y divide-ze-fdark">
+			<div class="min-h-4 py-4 pl-4 pr-20">
+				<img src="{% static 'images/logo.png' %}" alt="">
+			</div>
+			<div class="flex flex-col text-left items-start">
+				<button class="ml-3 my-1">
+					<div class="flex flex-row">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+						</svg>
+						Mesas
+					</div>
+				</button>
+				<a href="/pedidos/">
+					<button class="ml-3 my-1">
+						<div class="flex flex-row">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+							</svg>
+							Pedidos
+						</div>
+					</button>
+				</a>
+				<button class="ml-3 my-1">
+					<div class="flex flex-row">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+						</svg>
+						Gerenciar cardápio
+					</div>
+				</button>
+			</div>
+		</div>
+		<div class="grow"></div>
+		<button class="text-left ml-3 mb-2">
+			<div class="flex flex-row">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+				</svg>
+				Sair
+			</div>
+		</button>
+	</div>
+
+<!-- Listando mesas e pedidos -->
+
+<div class="container">
+  <div class="pedidos-container">
+      <h3 class="titulo">Pedidos por mesa </h3>  
+      {% if object_list %}
+          <ul class="mesas-grid">
+              {% for mesa, info in object_list.items %}
+                  <li class="mesa-item">
+                      <h4 class="mesa-titulo">Mesa {{ mesa }}</h4>
+                      <!--<h4 class="mesa-titulo">Mesa {{ mesa }} (Status: {{ info.status_mesa }})</h4> -->
+                      <div class="acoes mb-4">
+                          <!-- Botão Fechar Conta -->
+                          <form action="{% url 'fechar_conta' mesa %}" method="post" class="form-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-close" onclick="return confirm('Tem certeza que deseja fechar a conta desta mesa?');">
+                                Fechar Conta
+                            </button>
+                        </form>
+                        
+                      </div>
+                        
+                      {% if info.pedidos %}
+                          <ul class="pedidos-lista">
+                              {% for pedido in info.pedidos %}
+                                  <li class="pedido-item">
+                                      <p class="pedido-info">Pedido: {{ pedido.numeroPedido }}</p>
+                                      <p class="pedido-info">Item: {{ pedido.nomeItem }}</p>
+                                      <p class="pedido-info">Quantidade: {{ pedido.quantidade }}</p>
+                                      <p class="pedido-info">Preço: R$ {{ pedido.preco }}</p>
+                                      <div class="acoes space-x-2">
+                                          <!-- Formulário para Aumentar Quantidade -->
+                                          <form action="{% url 'aumentar_pedido' mesa pedido.numeroPedido %}" method="post" class="form-inline">
+                                              {% csrf_token %}
+                                              <input type="number" name="quantidade" value="1" min="1" class="input-quantidade rounded px-2 py-1" required>
+                                              <button type="submit" class="btn btn-edit">+</button>
+                                          </form>
+                                          
+                                          <!-- Formulário para Diminuir Quantidade -->
+                                          <form action="{% url 'diminuir_pedido' mesa pedido.numeroPedido %}" method="post" class="form-inline">
+                                              {% csrf_token %}
+                                              <button type="submit" class="btn btn-decrease" onclick="return confirm('Tem certeza que deseja diminuir a quantidade deste pedido?');">-</button>
+                                          </form>
+                                          
+                                          <!-- Formulário para Deletar Pedido -->
+                                          <form action="{% url 'deletar_pedido' mesa pedido.numeroPedido %}" method="post" class="form-inline">
+                                              {% csrf_token %}
+                                              <button type="submit" class="btn btn-delete" onclick="return confirm('Tem certeza que deseja deletar este pedido?');">Deletar</button>
+                                          </form>
+                                      </div>
+                                  </li>
+                              {% endfor %}
+                          </ul>
+                          
+                          <!-- Exibindo o Total da Mesa -->
+                          <div class="total-mesa mt-2">
+                              <strong>Total:</strong> R$ {{ info.total|floatformat:2 }}
+                          </div>
+                      {% else %}
+                          <p class="text-gray-500">Nenhum pedido para esta mesa.</p>
+                      {% endif %}
+                  </li>
+              {% endfor %}
+          </ul>
+      {% else %}
+          <p class="mensagem-nenhum-pedido">Nenhum pedido encontrado para esta mesa.</p>
+      {% endif %}
+  </div>
+</div>
+
+
+</div> 
+
+{% endblock %}
