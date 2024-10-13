@@ -62,4 +62,11 @@ class Usuario(AbstractBaseUser):
 			secret=secret,
 			algorithm="sha256",
 		).hexdigest()
+class ItemCardapio(models.Model):
+    nome_item = models.CharField(max_length=200)
+    descricao = models.TextField()
+    precos = models.DecimalField(max_digits=10, decimal_places=2)
+    imagem_item = models.ImageField(upload_to='imagens_cardapio/', blank=True, null=True)
+    def __str__(self):
+        return self.nome_item
 	

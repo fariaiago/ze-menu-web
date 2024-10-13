@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .forms import UsuarioCreationForm, UsuarioChangeForm
+from .forms import UsuarioCreationForm, UsuarioChangeForm, ItemForm
 from .models import Usuario
 
 class UsuarioAdmin(UserAdmin):
@@ -28,3 +28,23 @@ class UsuarioAdmin(UserAdmin):
 	filter_horizontal = ()
 
 admin.site.register(Usuario, UsuarioAdmin)
+
+class ItemAdmin(admin.ModelAdmin):
+	form = ItemForm
+	list_display = ("nome_item", "descricao", "precos", "imagem_item",)
+	list_filter = ("nome_item", "descricao", "precos", "imagem_item",)
+	fieldsets = (
+		(None, {"fields": ("nome", "descricao", "precos", "imagem_item")}),
+		("Permissions", {"fields": ()}),
+	)
+	add_fieldsets = (
+		(None, {
+			"classes": ("wide",),
+			"fields": (
+				"nome", "descricao", "precos", "imagem_item",
+			)}
+		),
+	)
+	search_fields = ("nome", "descricao", "precos", "imagem_item")
+	ordering = ("nome", "descricao", "precos", "imagem_item")
+	filter_horizontal = ()
