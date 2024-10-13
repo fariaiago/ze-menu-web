@@ -10,20 +10,20 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 def index(_request):
-	return redirect("login.html")
+	return redirect("login")
 
 class Login(View):
 
 	def get(self, request):
 		if request.user.is_authenticated:
-			return redirect("painel.html")
+			return redirect("painel")
 		return render(request, "login.html")
 	
 	def post(self, request):
 		usuario = authenticate(request, username=request.POST["email"], password=request.POST["senha"])
 		if usuario is not None:
 			login(request, usuario)
-			return redirect("painel.html")
+			return redirect("painel")
 		return render(request, "login.html")
 
 class Painel(View):
@@ -33,10 +33,10 @@ class Painel(View):
 class Logout(View):
 	def get(self, request):
 		logout(request)
-		return redirect("login.html")
+		return redirect("login")
 
 
-class PedidoListView(LoginRequiredMixin, ListView):
+class PedidoListView(ListView):
     template_name = 'pedido.html'
     context_object_name = 'object_list'  
 
@@ -162,3 +162,21 @@ class FecharConta(View):
             transaction.commit()
         messages.success(request, f'Conta da Mesa {pk} fechada com sucesso.')
         return redirect(reverse_lazy('pedido'))
+    
+class GerenciarCardapio(View):
+    def get(self, request):
+        categorias = self.getCategorias()
+        cardapio = {categoria: self.getItens(categoria) for categoria in categorias}
+        return render(request, "gerenciar_cardapio.html", {'cardapio': cardapio, 'categorias': categorias})
+
+    def getCategorias(self):
+        with connection.cursor() as cursor:
+            cursor.execute("select unnest(enum_range(NULL::emp1.categoria))")
+            rows = cursor.fetchall()
+        return [row[0] for row in rows]
+
+    def getItens(self, categoria):
+        with connection.cursor() as cursor:
+            cursor.execute("select nome_item, imagem_item from emp1.cardapio where categoria=%s", [categoria])
+            result = cursor.fetchall()
+        return result
