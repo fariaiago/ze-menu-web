@@ -1,8 +1,6 @@
 {
-	"emmet.includeLanguages": {
-		"html-eex": "html"
-	},
-	"files.associations": {
-		"*.html.heex": "html-eex"
-	}
+  "python.REPL.enableREPLSmartSend": false,
+  "emmet.includeLanguages": {
+    "django-html": "html"
+  }
 }
