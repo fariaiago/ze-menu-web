@@ -1,18 +1,10 @@
-# ZeMenuSite
+## Projeto de Sistemas - 2024.2 | Universidade Federal do Tocantins - Palmas
+#### Curso: Bacharelado em Ciência da Computação
+#### Professor: Edeilson Milhomem da Silva
+#### Time: Daniel Barbosa de Assis Costa, Danilo Oliveira Maciel, Iago Arruda Faria, Pablo Pereira Brito e Tarciso Filho Miranda Dias
 
-To start your Phoenix server:
+## Sobre ZéMenu
+ZéMenu é um sistema inovador de gerenciamento de pedidos desenvolvido por alunos, que visa modernizar o atendimento em restaurantes. Com ele, os clientes fazem seus pedidos diretamente pelo tablet fornecido pelo estabelecimento, tornando o processo mais rápido e preciso. Nossa proposta é facilitar a operação dos restaurantes, reduzir erros e custos e melhorar a experiência do cliente com o uso de tecnologia prática e acessível.
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+## Sobre este repositório
+Este repositório contém a parte web do projeto Zé Menu o qual foi utilizado a tecnologia Python, mais especificamente o framework Django em sua "construção".
