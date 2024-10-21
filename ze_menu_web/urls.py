@@ -34,4 +34,5 @@ urlpatterns = [
     path('pedidos/deletar/<int:mesa_id>/<int:pedido_id>/', views.DeletarPedido.as_view(), name='deletar_pedido'),
     path('fecharconta/<int:pk>/', views.FecharConta.as_view(), name='fechar_conta'),
     path('cardapio/',views.GerenciarCardapio.as_view(), name='gerenciar_cardapio'),
+    path('cardapio/adc_categoria/', views.AdicionarCategoria.as_view(), name='adicionar_categoria'),
 ]

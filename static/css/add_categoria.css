@@ -1,0 +1,85 @@
+/* Global resets and body styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #F5F5F5; /* Fundo cinza claro */
+}
+
+/* Container for centering content */
+.container {
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    position: fixed;
+    left: calc(100% - 60%);
+    /* justify-content: center; */
+    /* align-items: center; */
+    padding: 20px;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+p {
+    color: #888;
+    margin-bottom: 20px;
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #E0E0E0;
+    border-radius: 5px;
+    background-color: #F8F8F8;
+}
+
+.form-group textarea {
+    height: 100px;
+    resize: none;
+}
+
+/* Styling for the submit button */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #00A550;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    transform: scale(1.05);
+}
+
+/* Specific styling for the form wrapper */
+.form-wrapper {
+    background-color: white; /* Fundo branco */
+    padding: 20px;           /* Espaçamento interno */
+    border-radius: 8px;       /* Borda arredondada */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+.form-wrapper h5 {
+    font-weight: 600 3rem "Poppins", sans-serif; /* Título "Adicionar item" em negrito */
+}

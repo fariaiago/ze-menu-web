@@ -7,10 +7,10 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from contas.forms import ItemForm
+from contas.forms import ItemForm, AdicionarCategoriaForm
 from contas.models import Usuario
 
-def index(_request):
+def index(request):
 	return redirect("login")
 
 class Login(View):
@@ -194,6 +194,7 @@ class GerenciarCardapio(View):
             cursor.execute("select nome_item, imagem_item from emp1.cardapio where categoria=%s", [categoria])
             result = cursor.fetchall()
         return result
+    
 class AdicionarItem(View):
     def get(self, request):
         form = ItemForm()
@@ -229,3 +230,22 @@ class AdicionarItem(View):
             return redirect('painel.html')
         
         return render(request, 'adicionar_item.html', {'form': form})
+    
+class AdicionarCategoria(View):
+     def get(self, request):
+        form = AdicionarCategoriaForm()
+        return render(request, 'adicionar_categoria.html', {'form' : form})
+     
+     def post(self, request):
+        form = AdicionarCategoriaForm(request.POST)
+        if form.is_valid():
+            categoria = form.cleaned_data['categoria']
+            
+            with connection.cursor() as cursor:
+                 cursor.execute(
+                    f"""
+                    alter type emp1.categoria add value '{categoria}'
+                    """
+                )
+            
+            return redirect('/cardapio/')
