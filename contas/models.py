@@ -71,3 +71,5 @@ class ItemCardapio(models.Model):
     def __str__(self):
         return self.nome_item
 	
+class Categoria(models.Model):
+	categoria = models.CharField(max_length=30)

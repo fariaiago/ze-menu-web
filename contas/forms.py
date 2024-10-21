@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Usuario, ItemCardapio
+from .models import Usuario, ItemCardapio, Categoria
 from django.db import models
 from django import forms
 
@@ -24,3 +24,8 @@ class ItemForm(forms.ModelForm):
         widgets = {
             'imagem_item': forms.ClearableFileInput(attrs={'required': False}),
         }
+
+class AdicionarCategoriaForm(forms.ModelForm):
+    class Meta:
+        model = Categoria
+        fields = ['categoria']
