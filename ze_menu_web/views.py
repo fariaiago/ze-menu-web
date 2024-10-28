@@ -4,13 +4,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.generic import ListView
 from django.db import connection, transaction
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from contas.forms import ItemForm
+from contas.forms import ItemForm, AdicionarCategoriaForm
+from contas.models import Usuario
 
-
-def index(_request):
+def index(request):
 	return redirect("login")
 
 class Login(View):
@@ -27,15 +27,28 @@ class Login(View):
 			return redirect("painel")
 		return render(request, "login.html")
 
-class Painel(View):
+class Painel(LoginRequiredMixin, View):
 	def get(self, request):
 		return render(request, "painel.html")
 
-class Logout(View):
+class Logout(LoginRequiredMixin, View):
 	def get(self, request):
 		logout(request)
 		return redirect("login")
 
+class Cadastrar(View):
+	def get(self, request):
+		return render(request, 'cadastrar.html')
+	
+	def post(self, request):
+		if request.POST['senha'] == request.POST['confirmarsenha']:
+			Usuario.objects.create_user(request.POST['nome_empresa'], request.POST['email'], request.POST['senha'], request.POST['telefone'])
+			usuario = authenticate(request, username=request.POST["email"], password=request.POST["senha"])
+			if usuario is not None:
+				login(request, usuario)
+				return redirect("painel")
+		else:
+			return render(request, 'cadastrar.html', context={ 'erro': 'Senhas diferentes entre si'})
 
 class PedidoListView(ListView):
     template_name = 'pedido.html'
@@ -181,6 +194,7 @@ class GerenciarCardapio(View):
             cursor.execute("select nome_item, imagem_item from emp1.cardapio where categoria=%s", [categoria])
             result = cursor.fetchall()
         return result
+    
 class AdicionarItem(View):
     def get(self, request):
         form = ItemForm()
@@ -216,3 +230,22 @@ class AdicionarItem(View):
             return redirect('painel.html')
         
         return render(request, 'adicionar_item.html', {'form': form})
+    
+class AdicionarCategoria(View):
+     def get(self, request):
+        form = AdicionarCategoriaForm()
+        return render(request, 'adicionar_categoria.html', {'form' : form})
+     
+     def post(self, request):
+        form = AdicionarCategoriaForm(request.POST)
+        if form.is_valid():
+            categoria = form.cleaned_data['categoria']
+            
+            with connection.cursor() as cursor:
+                 cursor.execute(
+                    f"""
+                    alter type emp1.categoria add value '{categoria}'
+                    """
+                )
+            
+            return redirect('/cardapio/')

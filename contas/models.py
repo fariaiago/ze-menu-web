@@ -62,6 +62,7 @@ class Usuario(AbstractBaseUser):
 			secret=secret,
 			algorithm="sha256",
 		).hexdigest()
+
 class ItemCardapio(models.Model):
     nome_item = models.CharField(max_length=200)
     descricao = models.TextField()
@@ -70,3 +71,5 @@ class ItemCardapio(models.Model):
     def __str__(self):
         return self.nome_item
 	
+class Categoria(models.Model):
+	categoria = models.CharField(max_length=30)
