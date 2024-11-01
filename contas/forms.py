@@ -29,3 +29,7 @@ class AdicionarCategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
         fields = ['categoria']
+        from django import forms
+        
+class EditarCategoriaForm(forms.Form):
+    categoria_nova = forms.CharField(max_length=30, label='Novo nome da categoria')
