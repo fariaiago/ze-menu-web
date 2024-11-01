@@ -17,16 +17,14 @@ Including another URLconf
 from django.contrib import admin 
 from django.urls import path, include 
 from . import views
-from ze_menu_web.views import DeletarCategoria
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-	path('', views.index, name="index"),
-	path('login/', views.Login.as_view(), name='login'),
-	path('cadastrar/', views.Cadastrar.as_view(), name='cadastrar'),
-	path('painel/', views.Painel.as_view(), name='painel'),
-	path('logout/', views.Logout.as_view(), name='logout'),
+	  path('', views.index, name="index"),
+	  path('login/', views.Login.as_view(), name='login'),
+	  path('cadastrar/', views.Cadastrar.as_view(), name='cadastrar'),
+	  path('painel/', views.Painel.as_view(), name='painel'),
+	  path('logout/', views.Logout.as_view(), name='logout'),
     path('pedidos/', views.PedidoListView.as_view(), name='pedido'),
     path('cardapio/adc_item/', views.AdicionarItem.as_view(), name='adicionar_item'),
     path('pedidos/aumentar/<int:mesa_id>/<int:pedido_id>/', views.AumentarQuantidadePedido.as_view(), name='aumentar_pedido'),
@@ -35,5 +33,6 @@ urlpatterns = [
     path('fecharconta/<int:pk>/', views.FecharConta.as_view(), name='fechar_conta'),
     path('cardapio/',views.GerenciarCardapio.as_view(), name='gerenciar_cardapio'),
     path('cardapio/adc_categoria/', views.AdicionarCategoria.as_view(), name='adicionar_categoria'),
-    path('cardapio/deletar_categoria/<str:categoria>/', DeletarCategoria.as_view(), name='deletar_categoria'),
+    path('cardapio/deletar_categoria/<str:categoria>/', views.DeletarCategoria.as_view(), name='deletar_categoria'),
+    path('edit_categoria/<str:categoria_atual>/', views.EditarCategoria.as_view(), name='edit_categoria'),
 ]

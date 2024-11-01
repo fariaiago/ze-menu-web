@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from contas.forms import ItemForm, AdicionarCategoriaForm
+from contas.forms import ItemForm, AdicionarCategoriaForm, EditarCategoriaForm
 from contas.models import Usuario
 
 
@@ -342,3 +342,46 @@ class DeletarCategoria(View):
                     return redirect('/cardapio/')
 
         return redirect('/cardapio/')
+
+      
+class EditarCategoria(View):
+    def get(self, request, categoria_atual):
+        form = EditarCategoriaForm(initial={'categoria_nova': categoria_atual})
+        return render(request, 'edit_categoria.html', {'form': form, 'categoria_atual': categoria_atual})
+
+    def post(self, request, categoria_atual):
+        form = EditarCategoriaForm(request.POST)
+        if form.is_valid():
+            nova_categoria = form.cleaned_data['categoria_nova']
+            with connection.cursor() as cursor:
+                # Verifica as categorias existentes no ENUM
+                cursor.execute("SELECT unnest(enum_range(NULL::emp1.categoria)) AS category;")
+                existing_categories = [row[0] for row in cursor.fetchall()]
+
+                # Adiciona o novo valor ao ENUM se ele ainda não existir
+                if nova_categoria not in existing_categories:
+                    cursor.execute(f"ALTER TYPE emp1.categoria ADD VALUE '{nova_categoria}';")
+
+                # Atualiza os registros da tabela com a nova categoria
+                cursor.execute(f"UPDATE emp1.cardapio SET categoria = '{nova_categoria}' WHERE categoria = '{categoria_atual}';")
+
+                # Renomeia o tipo ENUM antigo
+                cursor.execute("ALTER TYPE emp1.categoria RENAME TO categoria_old;")
+
+                # Cria um novo tipo ENUM sem a categoria antiga
+                new_categories = [cat for cat in existing_categories if cat != categoria_atual]
+                new_categories.append(nova_categoria)  # Garante que a nova categoria está incluída
+                enum_values = ', '.join(f"'{cat}'" for cat in new_categories)
+                cursor.execute(f"CREATE TYPE emp1.categoria AS ENUM ({enum_values});")
+
+                # Atualiza a coluna para usar o novo tipo ENUM
+                cursor.execute("""
+                    ALTER TABLE emp1.cardapio
+                    ALTER COLUMN categoria TYPE emp1.categoria
+                    USING categoria::text::emp1.categoria;
+                """)
+
+                # Exclui o tipo ENUM antigo
+                cursor.execute("DROP TYPE emp1.categoria_old;")
+                
+            return redirect('/cardapio/')
