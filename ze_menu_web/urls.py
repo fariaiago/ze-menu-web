@@ -17,8 +17,8 @@ Including another URLconf
 from django.contrib import admin 
 from django.urls import path, include 
 from . import views
+from ze_menu_web.views import DeletarCategoria
 
-app_name = 'pedido'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,4 +35,5 @@ urlpatterns = [
     path('fecharconta/<int:pk>/', views.FecharConta.as_view(), name='fechar_conta'),
     path('cardapio/',views.GerenciarCardapio.as_view(), name='gerenciar_cardapio'),
     path('cardapio/adc_categoria/', views.AdicionarCategoria.as_view(), name='adicionar_categoria'),
+    path('cardapio/deletar_categoria/<str:categoria>/', DeletarCategoria.as_view(), name='deletar_categoria'),
 ]

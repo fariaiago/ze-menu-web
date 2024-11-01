@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from contas.forms import ItemForm, AdicionarCategoriaForm
 from contas.models import Usuario
 
+
 def index(request):
 	return redirect("login")
 
@@ -249,3 +250,95 @@ class AdicionarCategoria(View):
                 )
             
             return redirect('/cardapio/')
+
+
+class DeletarCategoria(View):
+    def post(self, request, categoria):
+        print("Categoria recebida para exclusão:", categoria)  # Confirmação do valor recebido
+
+        default_categoria = 'porcoes' 
+
+        with transaction.atomic(): 
+            with connection.cursor() as cursor:
+                try:
+                    # Verificar se a categoria a ser removida existe no ENUM
+                    cursor.execute("""
+                        SELECT 1
+                        FROM pg_enum
+                        WHERE enumtypid = 'emp1.categoria'::regtype
+                          AND enumlabel = %s;
+                    """, [categoria])
+                    if not cursor.fetchone():
+                        messages.error(request, f"Categoria '{categoria}' não existe.")
+                        print(f"Categoria '{categoria}' não existe no ENUM 'emp1.categoria'.")
+                        return redirect('/cardapio/')  # Redireciona para a página do cardápio
+
+                    # Verificar se a categoria padrão existe no ENUM
+                    cursor.execute("""
+                        SELECT 1
+                        FROM pg_enum
+                        WHERE enumtypid = 'emp1.categoria'::regtype
+                          AND enumlabel = %s;
+                    """, [default_categoria])
+                    if not cursor.fetchone():
+                        messages.error(request, f"Categoria padrão '{default_categoria}' não existe no ENUM 'emp1.categoria'.")
+                        print(f"Categoria padrão '{default_categoria}' não existe no ENUM 'emp1.categoria'.")
+                        return redirect('/cardapio/')  # Redireciona para a página do cardápio
+
+                    # Excluir os itens associados à categoria
+                    cursor.execute("""
+                        DELETE FROM emp1.cardapio
+                        WHERE categoria = %s;
+                    """, [categoria])
+                    deletados = cursor.rowcount
+                    print(f"{deletados} itens excluídos da categoria: {categoria}")
+                    messages.success(request, f"{deletados} itens da categoria '{categoria}' foram excluídos.")
+
+                    # Renomear o tipo ENUM existente para um temporário
+                    cursor.execute('ALTER TYPE emp1.categoria RENAME TO categoria_old;')
+                    print("Tipo ENUM renomeado para 'categoria_old'.")
+                    messages.info(request, "Tipo ENUM renomeado para 'categoria_old'.")
+
+                    # Obter todos os valores do ENUM 'categoria_old', exceto o valor a ser excluído
+                    cursor.execute("""
+                        SELECT enumlabel
+                        FROM pg_enum
+                        WHERE enumtypid = 'emp1.categoria_old'::regtype
+                          AND enumlabel != %s
+                        ORDER BY enumsortorder;
+                    """, [categoria])
+                    remaining_values = [row[0] for row in cursor.fetchall()]
+                    print(f"Valores restantes no ENUM (sem a categoria a ser removida): {remaining_values}")
+                    messages.info(request, f"Valores restantes no ENUM após remoção: {remaining_values}")
+
+                    if not remaining_values:
+                        raise ValueError("Não é possível remover a única categoria existente.")
+
+                    # Criar o novo tipo ENUM 'categoria' com os valores restantes
+                    enums = ', '.join(f"'{value}'" for value in remaining_values)
+                    cursor.execute(f"""
+                        CREATE TYPE emp1.categoria AS ENUM ({enums});
+                    """)
+                    print('Novo tipo ENUM "categoria" criado com os valores atualizados.')
+                    messages.info(request, "Novo tipo ENUM 'categoria' criado com os valores atualizados.")
+
+                    # Alterar a coluna 'categoria' para usar o novo tipo ENUM
+                    cursor.execute("""
+                        ALTER TABLE emp1.cardapio
+                        ALTER COLUMN categoria TYPE emp1.categoria
+                        USING categoria::text::emp1.categoria;
+                    """)
+                    print('Coluna "categoria" atualizada para o novo tipo ENUM "categoria".')
+                    messages.info(request, 'Coluna "categoria" atualizada para o novo tipo ENUM "categoria".')
+
+                    # Excluir o tipo ENUM antigo 'categoria_old'
+                    cursor.execute("DROP TYPE emp1.categoria_old;")
+                    print("Tipo ENUM antigo 'categoria_old' removido.")
+                    messages.success(request, f"Categoria '{categoria}' deletada com sucesso.")
+
+                except Exception as e:
+                    print(f"Erro ao deletar a categoria: {e}")
+                    messages.error(request, f"Erro ao deletar a categoria: {e}")
+                    return redirect('/cardapio/')
+
+        return redirect('/cardapio/')
