@@ -204,32 +204,26 @@ class AdicionarItem(View):
     def post(self, request):
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
-            # Pegando os dados do formulário
             nome_item = form.cleaned_data['nome_item']
             descricao = form.cleaned_data['descricao']
             precos = form.cleaned_data['precos']
             imagem_item = form.cleaned_data.get('imagem_item')
+            categoria = form.cleaned_data['categoria']
 
-            # Verificando se um arquivo de imagem foi enviado
-            if imagem_item:
-                imagem_item_name = imagem_item.name
-            else:
-                imagem_item_name = None  # Ou coloque um valor padrão aqui, se necessário
+            imagem_item_name = imagem_item.name if imagem_item else None
 
-            # Inserindo no banco de dados
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item)
-                    VALUES (%s, %s, %s, %s)
-                    """, [nome_item, descricao, precos, imagem_item_name]
+                    INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item, categoria)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """, [nome_item, descricao, precos, imagem_item_name, categoria]
                 )
-            
-            # Salvando usando o ORM
+
             form.save(commit=True)
 
-            return redirect('painel.html')
-        
+            return redirect('/cardapio/') 
+
         return render(request, 'adicionar_item.html', {'form': form})
     
 class AdicionarCategoria(View):
