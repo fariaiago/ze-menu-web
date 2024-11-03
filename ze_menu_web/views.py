@@ -227,7 +227,21 @@ class AdicionarItem(View):
             return redirect('/cardapio/') 
 
         return render(request, 'adicionar_item.html', {'form': form})
-    
+
+class DeletarItem(View):
+	def post(self, request, nome_item):
+		with transaction.atomic(): 
+			with connection.cursor() as cursor:
+				try:
+					cursor.execute("""
+						DELETE FROM emp1.cardapio
+						WHERE nome_item = %s;
+					""", [nome_item])
+					return redirect('/cardapio/')
+				except Exception as e:
+					return redirect('/cardapio/')
+		return redirect('/cardapio/')
+
 class AdicionarCategoria(View):
      def get(self, request):
         form = AdicionarCategoriaForm()
