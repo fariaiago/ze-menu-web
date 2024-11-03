@@ -4,11 +4,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.generic import ListView
 from django.db import connection, transaction
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from contas.forms import ItemForm, AdicionarCategoriaForm, EditarCategoriaForm
 from contas.models import Usuario
+from datetime import timedelta
+from django.utils import timezone
 
 
 def index(request):
@@ -379,3 +381,74 @@ class EditarCategoria(View):
                 cursor.execute("DROP TYPE emp1.categoria_old;")
                 
             return redirect('/cardapio/')
+        
+class RelatorioVenda(View):
+    template_name = 'relatorios.html'
+
+    def get(self, request):
+        # Produto mais vendido
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT nome_item, SUM(qtd) AS total_vendido
+                FROM emp1.pedidos
+                GROUP BY nome_item
+                ORDER BY total_vendido DESC
+                LIMIT 1;
+            """)
+            produto_mais_vendido = cursor.fetchone()
+        
+        # Produto menos vendido
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT nome_item, SUM(qtd) AS total_vendido
+                FROM emp1.pedidos
+                GROUP BY nome_item
+                ORDER BY total_vendido ASC
+                LIMIT 1;
+            """)
+            produto_menos_vendido = cursor.fetchone()
+        
+        # Quantidade de vendas mensais
+        inicio_mes = timezone.now().replace(day=1)
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT SUM(qtd) AS total_vendas
+                FROM emp1.pedidos
+                WHERE created_at >= %s;
+            """, [inicio_mes])
+            vendas_mensais = cursor.fetchone()[0] or 0
+        
+        # Faturamento semanal
+        inicio_semana = timezone.now() - timedelta(days=timezone.now().weekday())
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT SUM(qtd * preco) AS faturamento
+                FROM emp1.pedidos
+                WHERE created_at >= %s;
+            """, [inicio_semana])
+            faturamento_semanal = cursor.fetchone()[0] or 0
+        
+        # Faturamento mensal
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT SUM(qtd * preco) AS faturamento
+                FROM emp1.pedidos
+                WHERE created_at >= %s;
+            """, [inicio_mes])
+            faturamento_mensal = cursor.fetchone()[0] or 0
+        
+        context = {
+            'produto_mais_vendido': {
+                'nome_item': produto_mais_vendido[0] if produto_mais_vendido else None,
+                'total_vendido': produto_mais_vendido[1] if produto_mais_vendido else 0
+            },
+            'produto_menos_vendido': {
+                'nome_item': produto_menos_vendido[0] if produto_menos_vendido else None,
+                'total_vendido': produto_menos_vendido[1] if produto_menos_vendido else 0
+            },
+            'vendas_mensais': vendas_mensais,
+            'faturamento_semanal': faturamento_semanal,
+            'faturamento_mensal': faturamento_mensal,
+        }
+
+        return render(request, self.template_name, context)
