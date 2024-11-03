@@ -73,3 +73,20 @@ class ItemCardapio(models.Model):
 	
 class Categoria(models.Model):
 	categoria = models.CharField(max_length=30)
+
+class Pedido(models.Model):
+    numero_pedido = models.IntegerField(primary_key=True)
+    nome_item = models.TextField()
+    mesa = models.IntegerField()
+    status_pedido = models.CharField(max_length=50)
+    qtd = models.IntegerField()
+    preco = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'emp1.pedidos'
+        managed = False  # Define como False se a tabela já existir e não deve ser gerenciada pelo Django
+
+    def __str__(self):
+        return f"{self.nome_item} (Pedido {self.numero_pedido})"
