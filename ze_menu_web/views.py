@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.views.generic import ListView
@@ -11,7 +11,7 @@ from contas.forms import ItemForm, AdicionarCategoriaForm, EditarCategoriaForm
 from contas.models import Usuario
 from datetime import timedelta
 from django.utils import timezone
-
+from contas.models import ItemCardapio
 
 def index(request):
 	return redirect("login")
@@ -226,7 +226,38 @@ class AdicionarItem(View):
 
             return redirect('/cardapio/') 
 
-        return render(request, 'adicionar_item.html', {'form': form})
+        return render(request, 'adicionar_item.html', {'form': form})    
+
+class EditarItem(View):
+    def get(self, request, item_nome):
+        item = get_object_or_404(ItemCardapio, nome_item=item_nome)
+        form = ItemForm(instance=item)
+        return render(request, 'editar_item.html', {'form': form, 'item': item})
+
+    def post(self, request, item_nome):
+        item = get_object_or_404(ItemCardapio, nome_item=item_nome)
+        form = ItemForm(request.POST, request.FILES, instance=item)
+        
+        if form.is_valid():
+            nome_item = form.cleaned_data['nome_item']
+            descricao = form.cleaned_data['descricao']
+            precos = form.cleaned_data['precos']
+            imagem_item = form.cleaned_data.get('imagem_item')
+            categoria = form.cleaned_data['categoria']
+            imagem_item_name = imagem_item.name if imagem_item else None
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE emp1.cardapio
+                    SET nome_item = %s, descricao = %s, precos = %s, imagem_item = %s, categoria = %s
+                    WHERE nome_item = %s
+                    """, [nome_item, descricao, precos, imagem_item_name, categoria, item_nome]
+                )
+
+            return redirect('/cardapio/')
+
+        return render(request, 'editar_item.html', {'form': form, 'item': item})
 
 class DeletarItem(View):
 	def post(self, request, nome_item):
