@@ -62,11 +62,31 @@ class Usuario(AbstractBaseUser):
 			secret=secret,
 			algorithm="sha256",
 		).hexdigest()
+
 class ItemCardapio(models.Model):
     nome_item = models.CharField(max_length=200)
     descricao = models.TextField()
     precos = models.DecimalField(max_digits=10, decimal_places=2)
-    imagem_item = models.ImageField(upload_to='imagens_cardapio/', blank=True, null=True)
+    imagem_item = models.ImageField(upload_to='static/assets/images', blank=True, null=True)
     def __str__(self):
         return self.nome_item
 	
+class Categoria(models.Model):
+	categoria = models.CharField(max_length=30)
+
+class Pedido(models.Model):
+    numero_pedido = models.IntegerField(primary_key=True)
+    nome_item = models.TextField()
+    mesa = models.IntegerField()
+    status_pedido = models.CharField(max_length=50)
+    qtd = models.IntegerField()
+    preco = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'emp1.pedidos'
+        managed = False  # Define como False se a tabela já existir e não deve ser gerenciada pelo Django
+
+    def __str__(self):
+        return f"{self.nome_item} (Pedido {self.numero_pedido})"

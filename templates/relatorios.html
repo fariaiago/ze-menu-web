@@ -2,6 +2,66 @@
 
 {% block content %}
 
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .container {
+        width: 60%; /* Reduz a largura do container */
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        position: fixed;
+        left: 29%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+        color: #2e7d32;
+        text-align: center;
+    }
+    
+    table {
+        width: 100%; /* Faz com que a tabela use toda a largura do container */
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    table, th, td {
+        border: 1px solid #ccc;
+        padding: 12px;
+        text-align: center;
+    }
+    
+    th {
+        background-color: #c8e6c9;
+        font-weight: bold;
+        color: #2e7d32;
+    }
+    
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    tr:hover {
+        background-color: #e0f2f1;
+    }
+    
+    .section-title {
+        color: #2e7d32;
+        margin-top: 20px;
+        font-size: 1.2em;
+        text-align: center;
+    }
+    </style>
+
 {% load static %}
 <div class="flex w-screen divide-x divide-ze-fdark">
 	<div class="flex flex-col bg-white w-64 h-screen">
@@ -59,4 +119,58 @@
 	</div>
 	<div class=""></div>
 </div>
+<div class="container">
+    <h1>Relatório de Vendas</h1>
+
+    <!-- Produto Mais Vendido -->
+    <h2 class="section-title">Produto Mais Vendido</h2>
+    <table>
+        <tr>
+            <th>Produto</th>
+            <th>Total Vendido</th>
+        </tr>
+        <tr>
+            <td>{{ produto_mais_vendido.nome_item }}</td>
+            <td>{{ produto_mais_vendido.total_vendido }}</td>
+        </tr>
+    </table>
+
+    <!-- Produto Menos Vendido -->
+    <h2 class="section-title">Produto Menos Vendido</h2>
+    <table>
+        <tr>
+            <th>Produto</th>
+            <th>Total Vendido</th>
+        </tr>
+        <tr>
+            <td>{{ produto_menos_vendido.nome_item }}</td>
+            <td>{{ produto_menos_vendido.total_vendido }}</td>
+        </tr>
+    </table>
+
+    <!-- Quantidade de Vendas Mensal -->
+    <h2 class="section-title">Quantidade de Vendas Mensal</h2>
+    <table>
+        <tr>
+            <th>Total de Vendas no Mês</th>
+        </tr>
+        <tr>
+            <td>{{ vendas_mensais }}</td>
+        </tr>
+    </table>
+
+    <!-- Faturamento -->
+    <h2 class="section-title">Faturamento</h2>
+    <table>
+        <tr>
+            <th>Faturamento Semanal</th>
+            <th>Faturamento Mensal</th>
+        </tr>
+        <tr>
+            <td>R$ {{ faturamento_semanal }}</td>
+            <td>R$ {{ faturamento_mensal }}</td>
+        </tr>
+    </table>
+</div>
+
 {% endblock %}
