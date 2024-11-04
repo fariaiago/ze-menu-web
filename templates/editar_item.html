@@ -18,11 +18,11 @@ body {
 /* Container for centering content */
 .container {
     display: flex;
-    width: 100%;
-    height: fit-content;
-    position: fixed;
-    left: calc(100% - 60%);
+    width: 60%; /* Ajuste conforme necessário para a largura desejada */
+    margin: 0 auto; /* Centraliza horizontalmente */
+    margin-left: auto;
     padding: 20px;
+    height: fit-content; /* Mantém a altura ajustável ao conteúdo */
 }
 
 /* Sidebar styling */
@@ -207,19 +207,19 @@ button[type="submit"]:hover {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/adc_item.css' %}">
-    <title>Adicionar Item</title>
+    <title>Editar Item</title>
 	</head>
 
     <div class="flex-1 p-6">
 		<div class="container">
 			<div class="form-wrapper">
 				<h5><strong>Adicionar item</strong></h5>
-				<p class="categoria-title"><strong>Adicione um item ao seu cardápio</strong></p>
+				<p class="categoria-title"><strong>Edite um item do seu cardápio</strong></p>
 
-				<form action="{% url 'adicionar_item' %}" method="POST" enctype="multipart/form-data">
+				<form action="{% url 'editar_item' item.nome_item %}" method="POST" enctype="multipart/form-data">
 					{% csrf_token %}
 					{{ form.as_p }}
-					<button type="submit">Adicionar item</button>
+					<button type="submit">Editar item</button>
 				</form>
 			</div>
 		</div>
