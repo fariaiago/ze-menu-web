@@ -600,13 +600,20 @@ video {
   position: fixed;
 }
 
+.absolute {
+  position: absolute;
+}
+
 .relative {
   position: relative;
 }
 
-.mx-20 {
-  margin-left: 5rem;
-  margin-right: 5rem;
+.right-4 {
+  right: 1rem;
+}
+
+.top-4 {
+  top: 1rem;
 }
 
 .mx-48 {
@@ -646,10 +653,6 @@ video {
 
 .mt-2 {
   margin-top: 0.5rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
 }
 
 .mt-8 {
@@ -729,6 +732,21 @@ video {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.animate-fade {
+  animation: fadeOut 10s ease-in-out forwards;
+}
+
 .resize {
   resize: both;
 }
@@ -801,6 +819,11 @@ video {
   border-color: rgb(231 88 88 / var(--tw-border-opacity));
 }
 
+.border-ze-sucesso {
+  --tw-border-opacity: 1;
+  border-color: rgb(44 184 89 / var(--tw-border-opacity));
+}
+
 .bg-gray-200 {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity));
@@ -811,6 +834,10 @@ video {
   background-color: rgb(209 213 219 / var(--tw-bg-opacity));
 }
 
+.bg-transparent {
+  background-color: transparent;
+}
+
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
@@ -819,10 +846,6 @@ video {
 .bg-ze-verde1 {
   --tw-bg-opacity: 1;
   background-color: rgb(20 200 113 / var(--tw-bg-opacity));
-}
-
-.bg-transparent {
-  background-color: transparent;
 }
 
 .p-6 {
@@ -842,6 +865,11 @@ video {
 .px-24 {
   padding-left: 6rem;
   padding-right: 6rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .py-1 {
@@ -935,6 +963,11 @@ video {
   color: rgb(231 88 88 / var(--tw-text-opacity));
 }
 
+.text-ze-sucesso {
+  --tw-text-opacity: 1;
+  color: rgb(44 184 89 / var(--tw-text-opacity));
+}
+
 .text-zinc-800 {
   --tw-text-opacity: 1;
   color: rgb(39 39 42 / var(--tw-text-opacity));
@@ -969,6 +1002,21 @@ video {
 .placeholder\:text-zinc-900::placeholder {
   --tw-text-opacity: 1;
   color: rgb(24 24 27 / var(--tw-text-opacity));
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.hover\:animate-fade:hover {
+  animation: fadeOut 10s ease-in-out forwards;
 }
 
 .hover\:bg-ze-verde2:hover {
