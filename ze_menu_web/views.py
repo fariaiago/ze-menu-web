@@ -28,6 +28,7 @@ class Login(View):
 		if usuario is not None:
 			login(request, usuario)
 			return redirect("painel")
+		messages.error(request, 'E-mail ou senha inválidos.')
 		return render(request, "login.html")
 
 class Painel(LoginRequiredMixin, View):
@@ -51,7 +52,8 @@ class Cadastrar(View):
 				login(request, usuario)
 				return redirect("painel")
 		else:
-			return render(request, 'cadastrar.html', context={ 'erro': 'Senhas diferentes entre si'})
+			messages.error(request, 'Senhas diferentes entre si.')
+			return render(request, 'cadastrar.html')
 
 class PedidoListView(ListView):
     template_name = 'pedido.html'
@@ -199,34 +201,34 @@ class GerenciarCardapio(View):
         return result
     
 class AdicionarItem(View):
-    def get(self, request):
-        form = ItemForm()
-        return render(request, 'adicionar_item.html', {'form': form})
+	def get(self, request):
+		form = ItemForm()
+		return render(request, 'adicionar_item.html', {'form': form})
 
-    def post(self, request):
-        form = ItemForm(request.POST, request.FILES)
-        if form.is_valid():
-            nome_item = form.cleaned_data['nome_item']
-            descricao = form.cleaned_data['descricao']
-            precos = form.cleaned_data['precos']
-            imagem_item = form.cleaned_data.get('imagem_item')
-            categoria = form.cleaned_data['categoria']
+	def post(self, request):
+		form = ItemForm(request.POST, request.FILES)
+		if form.is_valid():
+			nome_item = form.cleaned_data['nome_item']
+			descricao = form.cleaned_data['descricao']
+			precos = form.cleaned_data['precos']
+			imagem_item = form.cleaned_data.get('imagem_item')
+			categoria = form.cleaned_data['categoria']
 
-            imagem_item_name = imagem_item.name if imagem_item else None
+			imagem_item_name = imagem_item.name if imagem_item else None
 
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item, categoria)
-                    VALUES (%s, %s, %s, %s, %s)
-                    """, [nome_item, descricao, precos, imagem_item_name, categoria]
-                )
+			with connection.cursor() as cursor:
+				cursor.execute(
+					"""
+					INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item, categoria)
+					VALUES (%s, %s, %s, %s, %s)
+					""", [nome_item, descricao, precos, imagem_item_name, categoria]
+				)
 
-            form.save(commit=True)
-
-            return redirect('/cardapio/') 
-
-        return render(request, 'adicionar_item.html', {'form': form})    
+			form.save(commit=True)
+			messages.success(request, 'Item adicionado ao cardapio com sucesso.')
+			return redirect('/cardapio/') 
+		messages.error(request, 'Adicionar item ao cardapio falhou.')
+		return render(request, 'adicionar_item.html', {'form': form})    
 
 class EditarItem(View):
     def get(self, request, item_nome):
@@ -254,9 +256,9 @@ class EditarItem(View):
                     WHERE nome_item = %s
                     """, [nome_item, descricao, precos, imagem_item_name, categoria, item_nome]
                 )
-
+            messages.success(request, 'Item editado com sucesso.')
             return redirect('/cardapio/')
-
+        messages.error(request, 'Editar item do cardapio falhou.')
         return render(request, 'editar_item.html', {'form': form, 'item': item})
 
 class DeletarItem(View):
@@ -268,9 +270,12 @@ class DeletarItem(View):
 						DELETE FROM emp1.cardapio
 						WHERE nome_item = %s;
 					""", [nome_item])
+					messages.success(request, 'Item removido do cardapio com sucesso.')
 					return redirect('/cardapio/')
 				except Exception as e:
+					messages.error(request, 'Remover item do cardapio falhou.')
 					return redirect('/cardapio/')
+		messages.error(request, 'Remover item do cardapio falhou.')
 		return redirect('/cardapio/')
 
 class AdicionarCategoria(View):
@@ -289,7 +294,7 @@ class AdicionarCategoria(View):
                     alter type emp1.categoria add value '{categoria}'
                     """
                 )
-            
+            messages.success(request, 'Categoria adicionada ao cardapio com sucesso.')
             return redirect('/cardapio/')
 
 
@@ -424,7 +429,7 @@ class EditarCategoria(View):
 
                 # Exclui o tipo ENUM antigo
                 cursor.execute("DROP TYPE emp1.categoria_old;")
-                
+            messages.success(request, 'Categoria editada com sucesso.')
             return redirect('/cardapio/')
         
 class RelatorioVenda(View):

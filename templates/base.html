@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zé Menu</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/output.css' %}" type="text/css"> <!-- We add the output Tailwind CSS here -->
-</head>
-<body class="h-screen flex justify-center items-center bg-gray-300">
-	{% block content %}{% endblock %}
-</body>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Zé Menu</title>
+		{% load static %}
+		<link rel="stylesheet" href="{% static 'css/output.css' %}" type="text/css">
+	</head>
+	<body class="h-screen flex justify-center items-center bg-gray-300">
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+					<div class="absolute flex top-4 right-4 justify-center bg-white text-ze-erro border-ze-erro border-2 py-4 px-4 rounded-lg animate-fade hover:animate-fade">
+						Erro: {{ message }}
+					</div>
+				{% else %}
+					<div class="absolute flex top-4 right-4 justify-center bg-white text-ze-sucesso border-ze-sucesso border-2 py-4 px-4 rounded-lg animate-fade hover:animate-fade">
+						Sucesso: {{ message }}
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		{% block content %}{% endblock %}
+	</body>
+</html>

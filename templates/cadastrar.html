@@ -8,11 +8,6 @@
 		<div class="flex justify-center text-xl">
 			<b class="pt-8">Cadastrar</b><br>
 		</div>
-		{% if erro %}
-		<div class="flex justify-center text-ze-erro border-2 border-ze-erro mt-4 py-4 mx-20 rounded">
-			{{ erro }}
-		</div>
-		{% endif %}
 
 		<form method="post" action="{% url 'cadastrar' %}" class="mt-10 space-t-15 bg-white px-20 pb-8">
 			{% csrf_token %}
