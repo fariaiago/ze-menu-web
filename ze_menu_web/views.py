@@ -12,6 +12,10 @@ from contas.models import Usuario
 from datetime import timedelta
 from django.utils import timezone
 from contas.models import ItemCardapio
+import os
+import qrcode
+from django.conf import settings
+from pathlib import Path
 
 def index(request):
 	return redirect("login")
@@ -502,3 +506,67 @@ class RelatorioVenda(View):
         }
 
         return render(request, self.template_name, context)
+
+
+def CriarMesas(request):
+    if request.method == "POST":
+        num = request.POST.get('id')
+
+        qr_content = f"{num} emp1"
+        # Define o caminho para salvar os QR Codes dentro de static/qrcodes
+        path_img = os.path.join(settings.BASE_DIR, "static", "qrcodes")
+
+        # Cria a pasta caso não exista
+        os.makedirs(path_img, exist_ok=True)
+
+        # Gera o QR Code
+        img = qrcode.make(qr_content)
+
+        # Salva o QR Code na pasta especificada
+        img.save(f"{path_img}/Mesa {num}.png")
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO emp1.mesas (status_mesa)
+                VALUES (%s)
+                """,
+                ['vazia']
+            )
+
+    return listar_qrcodes(request)
+
+def DeletarMesa(request):
+    if request.method == "POST":
+        # Obtém o número da mesa enviado pelo formulário
+        num = request.POST.get('mesa_id')
+        
+        # Remove a entrada correspondente no banco de dados
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM emp1.mesas
+                WHERE numero_mesa = %s
+                """,
+                [num]
+            )
+        
+        # Caminho para o arquivo do QR Code
+        path_img = os.path.join(settings.BASE_DIR, "static", "qrcodes", f"Mesa {num}.png")
+
+        # Remove o QR Code da pasta
+        if os.path.exists(path_img):
+            os.remove(path_img)
+
+    return listar_qrcodes(request)
+
+def listar_qrcodes(request):
+    # Caminho para qrcodes
+    qrcode_path = os.path.join(settings.BASE_DIR, 'static', 'qrcodes')
+    
+    # Lista todos os arquivos da pasta
+    qrcodes = [
+        f'qrcodes/{file}' for file in os.listdir(qrcode_path)
+    ]
+
+    return render(request, 'mesas.html', {'qrcodes': qrcodes})
