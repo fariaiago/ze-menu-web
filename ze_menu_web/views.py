@@ -205,34 +205,48 @@ class GerenciarCardapio(View):
         return result
     
 class AdicionarItem(View):
-	def get(self, request):
-		form = ItemForm()
-		return render(request, 'adicionar_item.html', {'form': form})
+    def getLastID(self):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM emp1.cardapio ORDER BY id DESC LIMIT 1")
+            result = cursor.fetchone()
+        return result[0] if result else 0 
 
-	def post(self, request):
-		form = ItemForm(request.POST, request.FILES)
-		if form.is_valid():
-			nome_item = form.cleaned_data['nome_item']
-			descricao = form.cleaned_data['descricao']
-			precos = form.cleaned_data['precos']
-			imagem_item = form.cleaned_data.get('imagem_item')
-			categoria = form.cleaned_data['categoria']
+    def get(self, request):
+        print(self.getLastID())
+        form = ItemForm()
+        return render(request, 'adicionar_item.html', {'form': form})
 
-			imagem_item_name = imagem_item.name if imagem_item else None
+    def post(self, request):
+        lastId = self.getLastID() + 1
+        form = ItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_item = ItemCardapio(
+                id = lastId,
+                nome_item=form.cleaned_data['nome_item'],
+                descricao=form.cleaned_data['descricao'],
+                precos=form.cleaned_data['precos'],
+                imagem_item = form.cleaned_data.get('imagem_item'),
+                categoria=form.cleaned_data['categoria'],
+            )
+            imagem_item= form.cleaned_data.get('imagem_item')
+            imagem_item_name = f"assets/images/{imagem_item.name}" if imagem_item else None
+            
+            new_item.save()
 
-			with connection.cursor() as cursor:
-				cursor.execute(
-					"""
-					INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item, categoria)
-					VALUES (%s, %s, %s, %s, %s)
-					""", [nome_item, descricao, precos, imagem_item_name, categoria]
-				)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item, categoria)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """, [form.cleaned_data['nome_item'], form.cleaned_data['descricao'], form.cleaned_data['precos'], imagem_item_name, form.cleaned_data['categoria']]
+                )
 
-			form.save(commit=True)
-			messages.success(request, 'Item adicionado ao cardapio com sucesso.')
-			return redirect('/cardapio/') 
-		messages.error(request, 'Adicionar item ao cardapio falhou.')
-		return render(request, 'adicionar_item.html', {'form': form})    
+            messages.success(request, 'Item adicionado ao cardapio com sucesso.')
+            return redirect('/cardapio/')
+        
+        messages.error(request, 'Adicionar item ao cardapio falhou.')
+        return render(request, 'adicionar_item.html', {'form': form})
+    
 
 class EditarItem(View):
     def get(self, request, item_nome):
@@ -250,7 +264,9 @@ class EditarItem(View):
             precos = form.cleaned_data['precos']
             imagem_item = form.cleaned_data.get('imagem_item')
             categoria = form.cleaned_data['categoria']
-            imagem_item_name = imagem_item.name if imagem_item else None
+            imagem_item_name = imagem_item.name[7:] if imagem_item else f'assets/images/{imagem_item.name}'
+
+            form.save()
 
             with connection.cursor() as cursor:
                 cursor.execute(

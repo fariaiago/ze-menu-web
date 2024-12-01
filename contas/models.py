@@ -67,9 +67,12 @@ class ItemCardapio(models.Model):
     nome_item = models.CharField(max_length=200)
     descricao = models.TextField()
     precos = models.DecimalField(max_digits=10, decimal_places=2)
+    categoria = models.CharField(max_length=30)
     imagem_item = models.ImageField(upload_to='static/assets/images', blank=True, null=True)
+
     def __str__(self):
         return self.nome_item
+
 	
 class Categoria(models.Model):
 	categoria = models.CharField(max_length=30)

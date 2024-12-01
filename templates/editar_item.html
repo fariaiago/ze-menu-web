@@ -193,7 +193,7 @@ button[type="submit"]:hover {
             </div>
         </div>
         <div class="grow"></div>
-        <a href="/login.html">
+        <a href="{% url 'logout' %}">
             <button class="text-left ml-3 mb-2">
                 <div class="flex flex-row">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-2">
@@ -215,7 +215,7 @@ button[type="submit"]:hover {
     <div class="flex-1 p-6">
 		<div class="container">
 			<div class="form-wrapper">
-				<h5><strong>Adicionar item</strong></h5>
+				<h5><strong>Editar item</strong></h5>
 				<p class="categoria-title"><strong>Edite um item do seu cardápio</strong></p>
 
 				<form action="{% url 'editar_item' item.nome_item %}" method="POST" enctype="multipart/form-data">
