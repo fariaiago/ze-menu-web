@@ -12,6 +12,10 @@ from contas.models import Usuario
 from datetime import timedelta
 from django.utils import timezone
 from contas.models import ItemCardapio
+import os
+import qrcode
+from django.conf import settings
+from pathlib import Path
 
 def index(request):
 	return redirect("login")
@@ -28,6 +32,7 @@ class Login(View):
 		if usuario is not None:
 			login(request, usuario)
 			return redirect("painel")
+		messages.error(request, 'E-mail ou senha inválidos.')
 		return render(request, "login.html")
 
 class Painel(LoginRequiredMixin, View):
@@ -51,7 +56,8 @@ class Cadastrar(View):
 				login(request, usuario)
 				return redirect("painel")
 		else:
-			return render(request, 'cadastrar.html', context={ 'erro': 'Senhas diferentes entre si'})
+			messages.error(request, 'Senhas diferentes entre si.')
+			return render(request, 'cadastrar.html')
 
 class PedidoListView(ListView):
     template_name = 'pedido.html'
@@ -199,34 +205,48 @@ class GerenciarCardapio(View):
         return result
     
 class AdicionarItem(View):
+    def getLastID(self):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM emp1.cardapio ORDER BY id DESC LIMIT 1")
+            result = cursor.fetchone()
+        return result[0] if result else 0 
+
     def get(self, request):
+        print(self.getLastID())
         form = ItemForm()
         return render(request, 'adicionar_item.html', {'form': form})
 
     def post(self, request):
+        lastId = self.getLastID() + 1
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
-            nome_item = form.cleaned_data['nome_item']
-            descricao = form.cleaned_data['descricao']
-            precos = form.cleaned_data['precos']
-            imagem_item = form.cleaned_data.get('imagem_item')
-            categoria = form.cleaned_data['categoria']
-
-            imagem_item_name = imagem_item.name if imagem_item else None
+            new_item = ItemCardapio(
+                id = lastId,
+                nome_item=form.cleaned_data['nome_item'],
+                descricao=form.cleaned_data['descricao'],
+                precos=form.cleaned_data['precos'],
+                imagem_item = form.cleaned_data.get('imagem_item'),
+                categoria=form.cleaned_data['categoria'],
+            )
+            imagem_item= form.cleaned_data.get('imagem_item')
+            imagem_item_name = f"assets/images/{imagem_item.name}" if imagem_item else None
+            
+            new_item.save()
 
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
                     INSERT INTO emp1.cardapio (nome_item, descricao, precos, imagem_item, categoria)
                     VALUES (%s, %s, %s, %s, %s)
-                    """, [nome_item, descricao, precos, imagem_item_name, categoria]
+                    """, [form.cleaned_data['nome_item'], form.cleaned_data['descricao'], form.cleaned_data['precos'], imagem_item_name, form.cleaned_data['categoria']]
                 )
 
-            form.save(commit=True)
-
-            return redirect('/cardapio/') 
-
-        return render(request, 'adicionar_item.html', {'form': form})    
+            messages.success(request, 'Item adicionado ao cardapio com sucesso.')
+            return redirect('/cardapio/')
+        
+        messages.error(request, 'Adicionar item ao cardapio falhou.')
+        return render(request, 'adicionar_item.html', {'form': form})
+    
 
 class EditarItem(View):
     def get(self, request, item_nome):
@@ -244,7 +264,9 @@ class EditarItem(View):
             precos = form.cleaned_data['precos']
             imagem_item = form.cleaned_data.get('imagem_item')
             categoria = form.cleaned_data['categoria']
-            imagem_item_name = imagem_item.name if imagem_item else None
+            imagem_item_name = imagem_item.name[7:] if imagem_item else f'assets/images/{imagem_item.name}'
+
+            form.save()
 
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -254,9 +276,9 @@ class EditarItem(View):
                     WHERE nome_item = %s
                     """, [nome_item, descricao, precos, imagem_item_name, categoria, item_nome]
                 )
-
+            messages.success(request, 'Item editado com sucesso.')
             return redirect('/cardapio/')
-
+        messages.error(request, 'Editar item do cardapio falhou.')
         return render(request, 'editar_item.html', {'form': form, 'item': item})
 
 class DeletarItem(View):
@@ -268,9 +290,12 @@ class DeletarItem(View):
 						DELETE FROM emp1.cardapio
 						WHERE nome_item = %s;
 					""", [nome_item])
+					messages.success(request, 'Item removido do cardapio com sucesso.')
 					return redirect('/cardapio/')
 				except Exception as e:
+					messages.error(request, 'Remover item do cardapio falhou.')
 					return redirect('/cardapio/')
+		messages.error(request, 'Remover item do cardapio falhou.')
 		return redirect('/cardapio/')
 
 class AdicionarCategoria(View):
@@ -289,7 +314,7 @@ class AdicionarCategoria(View):
                     alter type emp1.categoria add value '{categoria}'
                     """
                 )
-            
+            messages.success(request, 'Categoria adicionada ao cardapio com sucesso.')
             return redirect('/cardapio/')
 
 
@@ -424,7 +449,7 @@ class EditarCategoria(View):
 
                 # Exclui o tipo ENUM antigo
                 cursor.execute("DROP TYPE emp1.categoria_old;")
-                
+            messages.success(request, 'Categoria editada com sucesso.')
             return redirect('/cardapio/')
         
 class RelatorioVenda(View):
@@ -497,3 +522,67 @@ class RelatorioVenda(View):
         }
 
         return render(request, self.template_name, context)
+
+
+def CriarMesas(request):
+    if request.method == "POST":
+        num = request.POST.get('id')
+
+        qr_content = f"{num} emp1"
+        # Define o caminho para salvar os QR Codes dentro de static/qrcodes
+        path_img = os.path.join(settings.BASE_DIR, "static", "qrcodes")
+
+        # Cria a pasta caso não exista
+        os.makedirs(path_img, exist_ok=True)
+
+        # Gera o QR Code
+        img = qrcode.make(qr_content)
+
+        # Salva o QR Code na pasta especificada
+        img.save(f"{path_img}/Mesa {num}.png")
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO emp1.mesas (status_mesa)
+                VALUES (%s)
+                """,
+                ['vazia']
+            )
+
+    return listar_qrcodes(request)
+
+def DeletarMesa(request):
+    if request.method == "POST":
+        # Obtém o número da mesa enviado pelo formulário
+        num = request.POST.get('mesa_id')
+        
+        # Remove a entrada correspondente no banco de dados
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM emp1.mesas
+                WHERE numero_mesa = %s
+                """,
+                [num]
+            )
+        
+        # Caminho para o arquivo do QR Code
+        path_img = os.path.join(settings.BASE_DIR, "static", "qrcodes", f"Mesa {num}.png")
+
+        # Remove o QR Code da pasta
+        if os.path.exists(path_img):
+            os.remove(path_img)
+
+    return listar_qrcodes(request)
+
+def listar_qrcodes(request):
+    # Caminho para qrcodes
+    qrcode_path = os.path.join(settings.BASE_DIR, 'static', 'qrcodes')
+    
+    # Lista todos os arquivos da pasta
+    qrcodes = [
+        f'qrcodes/{file}' for file in os.listdir(qrcode_path)
+    ]
+
+    return render(request, 'mesas.html', {'qrcodes': qrcodes})

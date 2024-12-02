@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin 
 from django.urls import path, include 
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,4 +40,7 @@ urlpatterns = [
 	path('edit_categoria/<str:categoria_atual>/', views.EditarCategoria.as_view(), name='edit_categoria'),
 	path('relatorios/', views.RelatorioVenda.as_view(), name='relatorios_vendas'),
     path('cardapio/edit_item/<str:item_nome>/', views.EditarItem.as_view(), name='editar_item'),
+    path('mesas/criar/', views.CriarMesas, name='mesas'),
+    path('mesas/deletar/', views.DeletarMesa, name='deletar_mesa'),
+    path('mesas/', views.listar_qrcodes, name='listar_qrcodes'), 
 ]
